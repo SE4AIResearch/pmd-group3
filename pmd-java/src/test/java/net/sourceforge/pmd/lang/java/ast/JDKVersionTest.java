@@ -302,16 +302,21 @@ class JDKVersionTest extends BaseJavaTreeDumpTest {
         List<ASTMethodDeclaration> methods = acu.findDescendantsOfType(ASTMethodDeclaration.class, true);
         assertEquals(3, methods.size());
         for (ASTMethodDeclaration method : methods) {
-            assertFalse(method.getEnclosingType().isInterface());
+            assertFalse(isEnclosingTypeInterface(method));
         }
     }
-
+    private boolean isEnclosingTypeInterface(ASTMethodDeclaration method) {
+        return method.getEnclosingType().isInterface();
+    }
     @Test
     void jdk7PrivateMethodInnerClassInterface2() {
         ParseException thrown = assertThrows(ParseException.class, () -> java7.parseResource("private_method_in_inner_class_interface2.java"));
-        assertTrue(thrown.getMessage().contains("line 19"));
+        assertTrue(isExceptionMessageContainsLine(thrown.getMessage(), "line 19"));
     }
-
+	
+	private boolean isExceptionMessageContainsLine(String message, String line) {
+	    return message.contains(line);
+	}
     @Override
     public @NonNull BaseParsingHelper<?, ?> getParser() {
         return java9;

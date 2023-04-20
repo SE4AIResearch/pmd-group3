@@ -6,7 +6,9 @@ package net.sourceforge.pmd.lang.ast.impl.antlr4;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -94,77 +96,61 @@ public class AntlrNameDictionary {
      * eg using {@code "not"} as the name of {@code "!"} is too specific.
      */
     protected @Nullable String nonAlphaNumName(String name) {
-        switch (name) {
-        case "!": return "bang";
-        case "!!": return "double-bang";
+        Map<String, String> mapping = new HashMap<>();
+        mapping.put("!", "bang");
+        mapping.put("!!", "double-bang");
+        mapping.put("?", "question");
+        mapping.put("??", "double-question");
+        mapping.put("?:", "elvis");
+        mapping.put("?.", "question-dot");
+        mapping.put(":", "colon");
+        mapping.put(";", "semi");
+        mapping.put(",", "comma");
+        mapping.put("(", "lparen");
+        mapping.put(")", "rparen");
+        mapping.put("[", "lbracket");
+        mapping.put("]", "rbracket");
+        mapping.put("{", "lbrace");
+        mapping.put("}", "rbrace");
+        mapping.put("_", "underscore");
+        mapping.put(".", "dot");
+        mapping.put("..", "double-dot");
+        mapping.put("...", "ellipsis");
+        mapping.put("@", "at-symbol");
+        mapping.put("$", "dollar");
+        mapping.put("\\", "backslash");
+        mapping.put("/", "slash");
+        mapping.put("//", "double-slash");
+        mapping.put("`", "backtick");
+        mapping.put("'", "squote");
+        mapping.put("\"", "dquote");
+        mapping.put("\"\"\"", "triple-quote");
+        mapping.put(">", "gt");
+        mapping.put(">=", "ge");
+        mapping.put("<", "lt");
+        mapping.put("<=", "le");
+        mapping.put(">>", "double-gt");
+        mapping.put("<<", "double-lt");
+        mapping.put(">>>", "triple-gt");
+        mapping.put("<<<", "triple-lt");
+        mapping.put("=", "eq");
+        mapping.put("==", "double-eq");
+        mapping.put("===", "triple-eq");
+        mapping.put("!=", "not-eq");
+        mapping.put("&", "amp");
+        mapping.put("&&", "double-amp");
+        mapping.put("|", "pipe");
+        mapping.put("||", "double-pipe");
+        mapping.put("*", "star");
+        mapping.put("**", "double-star");
+        mapping.put("+", "plus");
+        mapping.put("++", "double-plus");
+        mapping.put("-", "minus");
+        mapping.put("--", "double-minus");
+        mapping.put("->", "rarrow");
+        mapping.put("<-", "larrow");
 
-        case "?": return "question";
-        case "??": return "double-question";
-        case "?:": return "elvis";
-        case "?.": return "question-dot";
-
-        case ":": return "colon";
-        case ";": return "semi";
-        case ",": return "comma";
-
-        case "(": return "lparen";
-        case ")": return "rparen";
-        case "[": return "lbracket";
-        case "]": return "rbracket";
-        case "{": return "lbrace";
-        case "}": return "rbrace";
-
-        case "_": return "underscore";
-
-        case ".": return "dot";
-        case "..": return "double-dot";
-        case "...": return "ellipsis";
-
-        case "@": return "at-symbol";
-        case "$": return "dollar";
-
-        case "\\": return "backslash";
-        case "/": return "slash";
-        case "//": return "double-slash";
-        case "`": return "backtick";
-        case "'": return "squote";
-        case "\"": return "dquote";
-        case "\"\"\"": return "triple-quote";
-
-        case ">": return "gt";
-        case ">=": return "ge";
-        case "<": return "lt";
-        case "<=": return "le";
-
-        case ">>": return "double-gt";
-        case "<<": return "double-lt";
-        case ">>>": return "triple-gt";
-        case "<<<": return "triple-lt";
-
-        case "=": return "eq";
-        case "==": return "double-eq";
-        case "===": return "triple-eq";
-        case "!=": return "not-eq";
-
-        case "&": return "amp";
-        case "&&": return "double-amp";
-        case "|": return "pipe";
-        case "||": return "double-pipe";
-
-        case "*": return "star";
-        case "**": return "double-star";
-
-        case "+": return "plus";
-        case "++": return "double-plus";
-        case "-": return "minus";
-        case "--": return "double-minus";
-
-        case "->": return "rarrow";
-        case "<-": return "larrow";
-
-        default:
-            return null;
-        }
+        return mapping.getOrDefault(name, null);
     }
 
     /**

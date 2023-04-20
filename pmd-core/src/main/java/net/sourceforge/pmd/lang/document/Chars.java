@@ -523,10 +523,6 @@ public final class Chars implements CharSequence {
         return () -> new Iterator<Chars>() {
             final int max = len;
             int pos = 0;
-            // If those are NOT_TRIED, then we should scan ahead to find them
-            // If the scan fails then they'll stay -1 forever and won't be tried again.
-            // This is important to scan in documents where we know there are no
-            // CR characters, as in our normalized TextFileContent.
             int nextCr = NOT_TRIED;
             int nextLf = NOT_TRIED;
 
@@ -550,16 +546,9 @@ public final class Chars implements CharSequence {
                 if (cr != NOT_FOUND && lf != NOT_FOUND) {
                     // found both CR and LF
                     int min = Math.min(cr, lf);
-                    if (lf == cr + 1) {
-                        // CRLF
-                        pos = lf + 1;
-                        nextCr = NOT_TRIED;
-                        nextLf = NOT_TRIED;
-                    } else {
-                        pos = min + 1;
-                        resetLookahead(cr, min);
-                    }
-
+                    pos = lf + 1;
+                    nextCr = NOT_TRIED;
+                    nextLf = NOT_TRIED;
                     return subSequence(curPos, min);
                 } else if (cr == NOT_FOUND && lf == NOT_FOUND) {
                     // no following line terminator, cut until the end
@@ -568,8 +557,8 @@ public final class Chars implements CharSequence {
                 } else {
                     // lf or cr (exactly one is != -1 and max returns that one)
                     int idx = Math.max(cr, lf);
-                    resetLookahead(cr, idx);
                     pos = idx + 1;
+                    resetLookahead(cr, idx);
                     return subSequence(curPos, idx);
                 }
             }

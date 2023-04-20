@@ -328,41 +328,6 @@ public class DBMSMetadata {
          * explicit parameter dburi field wildcard list
          *
          */
-        if (null == searchLanguages) {
-            List<String> dbURIList = (null == dburi) ? null : dburi.getLanguagesList();
-            if (null == dbURIList || dbURIList.isEmpty()) {
-                searchLanguages = wildcardList;
-            } else {
-                searchLanguages = dbURIList;
-            }
-        }
-
-        if (null == searchSchemas) {
-            List<String> dbURIList = (null == dburi) ? null : dburi.getSchemasList();
-            if (null == dbURIList || dbURIList.isEmpty()) {
-                searchSchemas = wildcardList;
-            } else {
-                searchSchemas = dbURIList;
-            }
-        }
-
-        if (null == searchSourceCodeTypes) {
-            List<String> dbURIList = (null == dburi) ? null : dburi.getSourceCodeTypesList();
-            if (null == dbURIList || dbURIList.isEmpty()) {
-                searchSourceCodeTypes = wildcardList;
-            } else {
-                searchSourceCodeTypes = dbURIList;
-            }
-        }
-
-        if (null == searchSourceCodeNames) {
-            List<String> dbURIList = (null == dburi) ? null : dburi.getSourceCodeNamesList();
-            if (null == dbURIList || dbURIList.isEmpty()) {
-                searchSourceCodeNames = wildcardList;
-            } else {
-                searchSourceCodeNames = dbURIList;
-            }
-        }
 
         try {
 
@@ -371,29 +336,16 @@ public class DBMSMetadata {
                         returnSourceCodeObjectsStatement);
                 try (PreparedStatement sourceCodeObjectsStatement = getConnection()
                         .prepareStatement(returnSourceCodeObjectsStatement)) {
-                    for (String language : searchLanguages) {
-                        for (String schema : searchSchemas) {
-                            for (String sourceCodeType : searchSourceCodeTypes) {
-                                for (String sourceCodeName : searchSourceCodeNames) {
-                                    sourceObjectsList.addAll(findSourceObjects(sourceCodeObjectsStatement, language, schema,
-                                            sourceCodeType, sourceCodeName));
-                                }
-                            }
-                        }
-                    }
+                    generateSourceObjects(sourceObjectsList, sourceCodeObjectsStatement, searchLanguages, searchSchemas,
+                            searchSourceCodeTypes, searchSourceCodeNames);
                 }
             } else {
                 // Use standard DatabaseMetaData interface
-                LOG.debug(
-                        "Have dbUri - no returnSourceCodeObjectsStatement, reverting to DatabaseMetaData.getProcedures(...)");
+                LOG.debug("Have dbUri - no returnSourceCodeObjectsStatement, reverting to DatabaseMetaData.getProcedures(...)");
 
                 DatabaseMetaData metadata = connection.getMetaData();
                 List<String> schemasList = dburi.getSchemasList();
-                for (String schema : schemasList) {
-                    for (String sourceCodeName : dburi.getSourceCodeNamesList()) {
-                        sourceObjectsList.addAll(findSourceObjectFromMetaData(metadata, schema, sourceCodeName));
-                    }
-                }
+                generateSourceObjectsFromMetaData(sourceObjectsList, metadata, schemasList, dburi.getSourceCodeNamesList());
             }
 
             LOG.trace("Identfied={} sourceObjects", sourceObjectsList.size());
@@ -401,6 +353,30 @@ public class DBMSMetadata {
             return sourceObjectsList;
         } catch (SQLException sqle) {
             throw new RuntimeException("Problem collecting list of source code objects", sqle);
+        }
+    }
+
+    private void generateSourceObjects(List<SourceObject> sourceObjectsList, PreparedStatement sourceCodeObjectsStatement,
+            List<String> searchLanguages, List<String> searchSchemas, List<String> searchSourceCodeTypes,
+            List<String> searchSourceCodeNames) throws SQLException {
+        for (String language : searchLanguages) {
+            for (String schema : searchSchemas) {
+                for (String sourceCodeType : searchSourceCodeTypes) {
+                    for (String sourceCodeName : searchSourceCodeNames) {
+                        sourceObjectsList.addAll(findSourceObjects(sourceCodeObjectsStatement, language, schema,
+                                sourceCodeType, sourceCodeName));
+                    }
+                }
+            }
+        }
+    }
+
+    private void generateSourceObjectsFromMetaData(List<SourceObject> sourceObjectsList, DatabaseMetaData metadata,
+            List<String> schemasList, List<String> sourceCodeNamesList) throws SQLException {
+        for (String schema : schemasList) {
+            for (String sourceCodeName : sourceCodeNamesList) {
+                sourceObjectsList.addAll(findSourceObjectFromMetaData(metadata, schema, sourceCodeName));
+            }
         }
     }
 

@@ -80,9 +80,9 @@ public abstract class AbstractAccumulatingRenderer extends AbstractRenderer {
             this.start();
         }
 
-        return new GlobalAnalysisListener() {
-            final GlobalReportBuilderListener reportBuilder = new GlobalReportBuilderListener();
+        final GlobalReportBuilderListener reportBuilder = new GlobalReportBuilderListener();
 
+        return new GlobalAnalysisListener() {
             @Override
             public FileAnalysisListener startFileAnalysis(TextFile file) {
                 AbstractAccumulatingRenderer.this.startFileAnalysis(file);
